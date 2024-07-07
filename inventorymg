@@ -1,0 +1,142 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+class Product {
+public:
+    int product_id;
+    std::string name;
+    int quantity;
+    double price;
+
+    Product(int id, const std::string &n, int q, double p) : product_id(id), name(n), quantity(q), price(p) {}
+};
+
+class Inventory {
+private:
+    std::vector<Product> products;
+
+public:
+    void add_product(int product_id, const std::string &name, int quantity, double price) {
+        products.emplace_back(product_id, name, quantity, price);
+        std::cout << "Product " << name << " added successfully.\n";
+    }
+
+    void update_product(int product_id, const std::string &name = "", int quantity = -1, double price = -1) {
+        for (auto &product : products) {
+            if (product.product_id == product_id) {
+                if (!name.empty()) product.name = name;
+                if (quantity != -1) product.quantity = quantity;
+                if (price != -1) product.price = price;
+                std::cout << "Product " << product_id << " updated successfully.\n";
+                return;
+            }
+        }
+        std::cout << "Product " << product_id << " not found.\n";
+    }
+
+    void delete_product(int product_id) {
+        for (auto it = products.begin(); it != products.end(); ++it) {
+            if (it->product_id == product_id) {
+                products.erase(it);
+                std::cout << "Product " << product_id << " deleted successfully.\n";
+                return;
+            }
+        }
+        std::cout << "Product " << product_id << " not found.\n";
+    }
+
+    void view_inventory() const {
+        if (products.empty()) {
+            std::cout << "No products in inventory.\n";
+        } else {
+            std::cout << "Inventory:\n";
+            for (const auto &product : products) {
+                std::cout << "ID: " << product.product_id 
+                          << ", Name: " << product.name 
+                          << ", Quantity: " << product.quantity 
+                          << ", Price: " << product.price << '\n';
+            }
+        }
+    }
+};
+
+void display_menu() {
+    std::cout << "\nInventory Management System\n"
+              << "1. Add Product\n"
+              << "2. Update Product\n"
+              << "3. Delete Product\n"
+              << "4. View Inventory\n"
+              << "5. Exit\n"
+              << "Enter your choice: ";
+}
+
+int main() {
+    Inventory inventory;
+    int choice;
+
+    do {
+        display_menu();
+        std::cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                int product_id, quantity;
+                std::string name;
+                double price;
+                std::cout << "Enter product ID: ";
+                std::cin >> product_id;
+                std::cout << "Enter product name: ";
+                std::cin.ignore();
+                std::getline(std::cin, name);
+                std::cout << "Enter product quantity: ";
+                std::cin >> quantity;
+                std::cout << "Enter product price: ";
+                std::cin >> price;
+                inventory.add_product(product_id, name, quantity, price);
+                break;
+            }
+            case 2: {
+                int product_id, quantity = -1;
+                std::string name;
+                double price = -1;
+                std::cout << "Enter product ID to update: ";
+                std::cin >> product_id;
+                std::cout << "Enter new name (leave blank to keep current): ";
+                std::cin.ignore();
+                std::getline(std::cin, name);
+                std::cout << "Enter new quantity (leave blank to keep current): ";
+                std::string qty_str;
+                std::getline(std::cin, qty_str);
+                if (!qty_str.empty()) quantity = std::stoi(qty_str);
+                std::cout << "Enter new price (leave blank to keep current): ";
+                std::string price_str;
+                std::getline(std::cin, price_str);
+                if (!price_str.empty()) price = std::stod(price_str);
+                inventory.update_product(product_id, name, quantity, price);
+                break;
+            }
+            case 3: {
+                int product_id;
+                std::cout << "Enter product ID to delete: ";
+                std::cin >> product_id;
+                inventory.delete_product(product_id);
+                break;
+            }
+            case 4: {
+                inventory.view_inventory();
+                break;
+            }
+            case 5: {
+                std::cout << "Exiting the system.\n";
+                break;
+            }
+            default: {
+                std::cout << "Invalid choice. Please try again.\n";
+                break;
+            }
+        }
+    } while (choice != 5);
+
+    return 0;
+}
