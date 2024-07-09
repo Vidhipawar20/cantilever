@@ -1,0 +1,146 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <ctime>
+
+class User {
+private:
+    std::string name;
+    int id;
+    std::vector<User*> friends;
+    std::vector<std::string> messages;
+
+public:
+    User(std::string name, int id) : name(name), id(id) {}
+
+    std::string getName() const { return name; }
+    int getId() const { return id; }
+
+    void addFriend(User* user) {
+        friends.push_back(user);
+    }
+
+    void postMessage(const std::string& message) {
+        time_t now = time(0);
+        std::string timestamp = ctime(&now);
+        messages.push_back(timestamp + ": " + message);
+    }
+
+    void displayFriends() const {
+        std::cout << name << "'s friends:\n";
+        for (const auto& friendUser : friends) {
+            std::cout << friendUser->getName() << "\n";
+        }
+    }
+
+    void displayMessages() const {
+        std::cout << name << "'s messages:\n";
+        for (const auto& message : messages) {
+            std::cout << message << "\n";
+        }
+    }
+};
+#include <iostream>
+#include <vector>
+#include <string>
+
+class SocialNetwork {
+private:
+    std::vector<User> users;
+
+public:
+    void addUser(const std::string& name) {
+        int id = users.size();
+        users.push_back(User(name, id));
+        std::cout << "User " << name << " added with ID " << id << "\n";
+    }
+
+    User* getUserById(int id) {
+        for (auto& user : users) {
+            if (user.getId() == id) {
+                return &user;
+            }
+        }
+        return nullptr;
+    }
+
+    void addFriendship(int userId1, int userId2) {
+        User* user1 = getUserById(userId1);
+        User* user2 = getUserById(userId2);
+
+        if (user1 && user2) {
+            user1->addFriend(user2);
+            user2->addFriend(user1);
+            std::cout << "Friendship added between " << user1->getName() << " and " << user2->getName() << "\n";
+        } else {
+            std::cout << "Invalid user ID(s)\n";
+        }
+    }
+
+    void postMessage(int userId, const std::string& message) {
+        User* user = getUserById(userId);
+        if (user) {
+            user->postMessage(message);
+            std::cout << "Message posted by " << user->getName() << "\n";
+        } else {
+            std::cout << "Invalid user ID\n";
+        }
+    }
+
+    void displayUserInfo(int userId) {
+        User* user = getUserById(userId);
+        if (user) {
+            user->displayFriends();
+            user->displayMessages();
+        } else {
+            std::cout << "Invalid user ID\n";
+        }
+    }
+};
+#include <iostream>
+#include "User.h"
+#include "SocialNetwork.h"
+
+int main() {
+    SocialNetwork network;
+
+    int choice;
+    while (true) {
+        std::cout << "\n1. Add User\n2. Add Friend\n3. Post Message\n4. Display User Info\n5. Exit\n";
+        std::cin >> choice;
+
+        if (choice == 1) {
+            std::string name;
+            std::cout << "Enter user name: ";
+            std::cin >> name;
+            network.addUser(name);
+        } else if (choice == 2) {
+            int userId1, userId2;
+            std::cout << "Enter user ID 1: ";
+            std::cin >> userId1;
+            std::cout << "Enter user ID 2: ";
+            std::cin >> userId2;
+            network.addFriendship(userId1, userId2);
+        } else if (choice == 3) {
+            int userId;
+            std::string message;
+            std::cout << "Enter user ID: ";
+            std::cin >> userId;
+            std::cout << "Enter message: ";
+            std::cin.ignore(); // To ignore the newline left by std::cin
+            std::getline(std::cin, message);
+            network.postMessage(userId, message);
+        } else if (choice == 4) {
+            int userId;
+            std::cout << "Enter user ID: ";
+            std::cin >> userId;
+            network.displayUserInfo(userId);
+        } else if (choice == 5) {
+            break;
+        } else {
+            std::cout << "Invalid choice, try again.\n";
+        }
+    }
+
+    return 0;
+}
